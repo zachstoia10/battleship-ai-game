@@ -8,7 +8,6 @@ import { Cell, type CellShip, type CellStatus } from './Cell'
 export interface PlacementPreview {
   cells: Coord[]
   valid: boolean
-  shipId?: string
 }
 
 interface BoardProps {
@@ -63,7 +62,6 @@ export function Board({
   isCellDisabled,
 }: BoardProps) {
   const previewKeys = new Set(preview?.cells.map(coordKey))
-  const ghostLogo = preview?.valid && preview.shipId ? brandFor(preview.shipId)?.logo : null
 
   return (
     <div
@@ -94,7 +92,6 @@ export function Board({
                 preview={inPreview ? (preview?.valid ? 'valid' : 'invalid') : null}
                 isLastShot={!!lastShot && sameCoord(lastShot, coord)}
                 ship={ship ? toCellShip(ship, coord, showShips || status === 'sunk') : null}
-                ghostLogo={inPreview ? ghostLogo : null}
                 disabled={disabled || !onCellClick || (isCellDisabled?.(coord) ?? false)}
                 onClick={() => onCellClick?.(coord)}
                 onHover={() => onCellHover?.(coord)}

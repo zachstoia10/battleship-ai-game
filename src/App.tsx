@@ -37,7 +37,6 @@ export default function App({ aiDelayMs }: AppProps) {
     preview = {
       cells: cells.filter(isInBounds),
       valid: validatePlacement(playerBoard, cells, selectedDef.id) === null,
-      shipId: selectedDef.id,
     }
   }
 

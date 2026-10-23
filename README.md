@@ -4,7 +4,7 @@ A Cognition-themed Battleship game: sink five competing AI coding products befor
 
 ## How to play
 
-1. **Deploy your fleet.** Choose a ship from the panel and click a cell on *Your fleet* to place it (the clicked cell is the bow; ships extend right or down). A blue preview (with the competitor's logo) means the spot is valid, red means it overlaps or runs off the board.
+1. **Deploy your fleet.** Choose a ship from the panel and click a cell on *Your fleet* to place it (the clicked cell is the bow; ships extend right or down). A blue preview means the spot is valid, red means it overlaps or runs off the board.
    - **Rotate** button or the <kbd>R</kbd> key switches horizontal/vertical.
    - **Randomize** places the whole fleet for you; **Clear** removes every ship.
    - Click a placed ship (on the board or in the list) to pick it up and move it.

@@ -20,7 +20,6 @@ interface CellProps {
   isLastShot: boolean
   disabled: boolean
   ship?: CellShip | null
-  ghostLogo?: string | null
   onClick: () => void
   onHover: () => void
 }
@@ -40,7 +39,6 @@ export function Cell({
   isLastShot,
   disabled,
   ship,
-  ghostLogo,
   onClick,
   onHover,
 }: CellProps) {
@@ -71,7 +69,6 @@ export function Cell({
       onFocus={onHover}
     >
       {ship && <img className="cell__logo" src={ship.logo} alt="" draggable={false} />}
-      {!ship && ghostLogo && <img className="cell__logo cell__logo--ghost" src={ghostLogo} alt="" draggable={false} />}
       {(status === 'hit' || status === 'sunk') && <span className="cell__marker cell__marker--hit" />}
       {status === 'miss' && <span className="cell__marker cell__marker--miss" />}
     </button>
