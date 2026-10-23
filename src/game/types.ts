@@ -29,11 +29,11 @@ export type Player = 'player' | 'ai'
 
 /** The player's (Cognition's) fleet. */
 export const FLEET: readonly ShipDefinition[] = [
-  { id: 'carrier', name: 'Carrier', length: 5 },
-  { id: 'battleship', name: 'Battleship', length: 4 },
-  { id: 'cruiser', name: 'Cruiser', length: 3 },
-  { id: 'submarine', name: 'Submarine', length: 3 },
-  { id: 'destroyer', name: 'Destroyer', length: 2 },
+  { id: 'carrier', name: 'Zachary Stoia', length: 5 },
+  { id: 'battleship', name: 'William McCarthy', length: 4 },
+  { id: 'cruiser', name: 'Austin Mead', length: 3 },
+  { id: 'submarine', name: 'Sebastian Canizares', length: 3 },
+  { id: 'destroyer', name: 'Adam Achebe', length: 2 },
 ]
 
 /** The AI's fleet: same lengths, branded as Cognition's competitors. */

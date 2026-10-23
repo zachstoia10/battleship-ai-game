@@ -97,8 +97,8 @@ function handlePlacement(state: GameState, action: GameAction): GameState {
           ...state,
           notice:
             result.reason === 'overlap'
-              ? `The ${def.name} would overlap another ship.`
-              : `The ${def.name} would extend beyond the board.`,
+              ? `${def.name} would overlap another ship.`
+              : `${def.name} would extend beyond the board.`,
         }
       }
       return {
@@ -207,9 +207,9 @@ function handleAIAttack(state: GameState, coord: Coord, gameId: number): GameSta
     shipId: attack.sunkShip?.id,
     shipName: attack.sunkShip?.name,
     text: attack.sunkShip
-      ? `The enemy sank your ${attack.sunkShip.name} at ${label}!`
+      ? `The enemy sank ${attack.sunkShip.name} at ${label}!`
       : attack.result === 'hit'
-        ? `The enemy hit your ${ship?.name ?? 'ship'} at ${label}.`
+        ? `The enemy hit ${ship?.name ?? 'your ship'} at ${label}.`
         : `The enemy missed at ${label}.`,
   })
   const won = allShipsSunk(attack.board)

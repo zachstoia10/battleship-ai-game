@@ -177,7 +177,7 @@ describe('win detection and game over', () => {
     })
     expect(s.phase).toBe('gameOver')
     expect(s.winner).toBe('ai')
-    expect(s.log.find((e) => e.kind === 'sunk')?.text).toBe('The enemy sank your Destroyer at B9!')
+    expect(s.log.find((e) => e.kind === 'sunk')?.text).toBe('The enemy sank Adam Achebe at B9!')
   })
 
   it('rejects all attacks after the game ends', () => {

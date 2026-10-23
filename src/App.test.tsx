@@ -62,9 +62,9 @@ describe('App', () => {
       expect(cell('Your waters', c)).toHaveAttribute('data-status', 'ship')
     }
 
-    // Battleship (4) horizontally from H2 would run off the board.
+    // William McCarthy (4) horizontally from H2 would run off the board.
     fireEvent.click(cell('Your waters', 'H2'))
-    expect(screen.getByText(/extend beyond the board/)).toBeInTheDocument()
+    expect(screen.getByText('William McCarthy would extend beyond the board.')).toBeInTheDocument()
     expect(cell('Your waters', 'H2')).toHaveAttribute('data-status', 'empty')
 
     // Rotate, then place the battleship vertically down column J.
