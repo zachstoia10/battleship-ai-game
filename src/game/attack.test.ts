@@ -50,7 +50,7 @@ describe('attack handling', () => {
 describe('sinking ships', () => {
   it('reports a ship as sunk only when every cell is hit', () => {
     let board = buildFleetBoard() // destroyer at row 8, cols 0-1
-    const destroyer = board.ships.find((s) => s.id === 'gemini')!
+    const destroyer = board.ships.find((s) => s.id === 'destroyer')!
     const first = receiveAttack(board, { row: 8, col: 0 })
     if (!first.ok) throw new Error()
     expect(first.sunkShip).toBeNull()
@@ -59,9 +59,9 @@ describe('sinking ships', () => {
 
     const second = receiveAttack(board, { row: 8, col: 1 })
     if (!second.ok) throw new Error()
-    expect(second.sunkShip?.id).toBe('gemini')
+    expect(second.sunkShip?.id).toBe('destroyer')
     expect(isShipSunk(second.board, destroyer)).toBe(true)
-    expect(sunkShips(second.board).map((s) => s.id)).toEqual(['gemini'])
+    expect(sunkShips(second.board).map((s) => s.id)).toEqual(['destroyer'])
   })
 
   it('does not report a sink when hitting an already-damaged different ship', () => {

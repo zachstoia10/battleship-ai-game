@@ -15,7 +15,7 @@ export function StatusBanner({ phase, turn, winner, notice }: StatusBannerProps)
     message = 'Position your ships, then start the battle.'
     tone = 'neutral'
   } else if (phase === 'gameOver') {
-    message = winner === 'player' ? 'Victory! You beat every competitor.' : 'Defeat. Your fleet has been sunk.'
+    message = winner === 'player' ? "Congratulations! You've Beaten the Competition!" : 'Defeat. Your fleet has been sunk.'
     tone = winner === 'player' ? 'win' : 'lose'
   } else if (turn === 'player') {
     message = 'Your turn — fire on the competitor waters.'

@@ -1,14 +1,18 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
-import { ELIMINATION_BANNER_MS } from './components/EliminationBanner'
+import { ELIMINATION_BANNER_MS, VICTORY_BANNER_MS } from './components/EliminationBanner'
 import { buildFleetBoard } from './test/helpers'
 
 // Make every "random" fleet the known layout from buildFleetBoard so the
 // UI tests know where the AI's ships are: rows 0/2/4/6/8 from column A.
 vi.mock('./game/board', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./game/board')>()
-  return { ...actual, createRandomFleetBoard: () => buildFleetBoard() }
+  return {
+    ...actual,
+    createRandomFleetBoard: (_rng?: () => number, fleet?: Parameters<typeof buildFleetBoard>[1]) =>
+      buildFleetBoard({}, fleet),
+  }
 })
 
 const AI_DELAY = 500
@@ -102,14 +106,18 @@ describe('App', () => {
   it('shows hits, sunk ships and remaining counts, then declares the winner', () => {
     render(<App aiDelayMs={AI_DELAY} />)
     startRandomGame()
-    const remaining = () => screen.getByTestId('Competitors-remaining').textContent
+    const remaining = () => screen.getByTestId('competitors-remaining').textContent
+    expect(remaining()).toBe('5 of 5 Competitors Remaining')
 
     fireEvent.click(cell('Enemy waters', 'A9'))
     expect(cell('Enemy waters', 'A9')).toHaveAttribute('data-status', 'hit')
     finishAITurn()
     fireEvent.click(cell('Enemy waters', 'B9'))
     expect(cell('Enemy waters', 'A9')).toHaveAttribute('data-status', 'sunk')
-    expect(remaining()).toBe('4 / 5 afloat')
+    expect(remaining()).toBe('4 of 5 Competitors Remaining')
+    expect(screen.getByTestId('rival-gemini')).toHaveTextContent('Eliminated')
+    expect(screen.getByTestId('rival-gemini')).toHaveClass('rival--eliminated')
+    expect(screen.getByTestId('rival-cursor')).toHaveTextContent('Active')
     expect(screen.getByText('You eliminated Google Gemini Code Assist at B9!')).toBeInTheDocument()
     finishAITurn()
 
@@ -118,8 +126,13 @@ describe('App', () => {
       finishAITurn()
     }
     // The AI could in theory win first; with 15 more moves it cannot sink 17 cells.
-    expect(status()).toMatch(/Victory/)
-    expect(remaining()).toBe('0 / 5 afloat')
+    expect(status()).toBe("Congratulations! You've Beaten the Competition!")
+    expect(screen.getByRole('alert')).toHaveTextContent("Congratulations! You've Beaten the Competition!")
+    expect(remaining()).toBe('0 of 5 Competitors Remaining')
+    act(() => {
+      vi.advanceTimersByTime(VICTORY_BANNER_MS)
+    })
+    expect(screen.queryByTestId('elimination')).not.toBeInTheDocument()
     // No attacks once the game is over.
     expect(cell('Enemy waters', 'J10')).toBeDisabled()
   })
@@ -140,31 +153,19 @@ describe('App', () => {
     yourCells.forEach((b) => expect(b).toHaveAttribute('data-status', 'empty'))
   })
 
-  it('renders competitor logos along horizontal and vertical ships', () => {
+  it('keeps the player ships as classic ships with no competitor logos', () => {
     render(<App aiDelayMs={AI_DELAY} />)
-    // GitHub Copilot (5) horizontally from A1.
+    expect(screen.getByRole('heading', { name: /Cognition · Your fleet/ })).toBeInTheDocument()
+    expect(screen.queryByText('GitHub Copilot', { selector: '.ship-option__name' })).not.toBeInTheDocument()
     fireEvent.click(cell('Your waters', 'A1'))
-    const row = ['A1', 'B1', 'C1', 'D1', 'E1']
-    row.forEach((c, i) => {
-      const el = cell('Your waters', c)
-      expect(el).toHaveAttribute('data-ship', 'copilot')
-      expect(el).toHaveClass('cell--h')
-      expect(el).toHaveClass(i === 0 ? 'cell--seg-start' : i === row.length - 1 ? 'cell--seg-end' : 'cell--seg-middle')
-      expect(el.querySelector('img.cell__logo')).not.toBeNull()
-    })
-    expect(cell('Your waters', 'F1')).not.toHaveAttribute('data-ship')
-
-    // Cursor (4) vertically down column J.
     fireEvent.click(screen.getByRole('button', { name: /Rotate/ }))
     fireEvent.click(cell('Your waters', 'J2'))
-    const col = ['J2', 'J3', 'J4', 'J5']
-    col.forEach((c, i) => {
+    for (const c of ['A1', 'B1', 'C1', 'D1', 'E1', 'J2', 'J3', 'J4', 'J5']) {
       const el = cell('Your waters', c)
-      expect(el).toHaveAttribute('data-ship', 'cursor')
-      expect(el).toHaveClass('cell--v')
-      expect(el).toHaveClass(i === 0 ? 'cell--seg-start' : i === col.length - 1 ? 'cell--seg-end' : 'cell--seg-middle')
-      expect(el.querySelector('img.cell__logo')).not.toBeNull()
-    })
+      expect(el).toHaveAttribute('data-status', 'ship')
+      expect(el).not.toHaveAttribute('data-ship')
+      expect(el.querySelector('img')).toBeNull()
+    }
   })
 
   it('keeps enemy competitors hidden until hit, then shows the logo under the red marker', () => {

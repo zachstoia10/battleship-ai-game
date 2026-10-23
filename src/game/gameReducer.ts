@@ -8,7 +8,7 @@ import {
 } from './board'
 import { allShipsSunk, receiveAttack } from './attack'
 import { formatCoord } from './coords'
-import { FLEET, type Board, type Coord, type Orientation, type Player } from './types'
+import { ENEMY_FLEET, FLEET, type Board, type Coord, type Orientation, type Player } from './types'
 
 export type Phase = 'placement' | 'playing' | 'gameOver'
 
@@ -140,7 +140,7 @@ function handlePlacement(state: GameState, action: GameAction): GameState {
         ...state,
         phase: 'playing',
         turn: 'player',
-        aiBoard: action.aiBoard ?? createRandomFleetBoard(),
+        aiBoard: action.aiBoard ?? createRandomFleetBoard(Math.random, ENEMY_FLEET),
         selectedShipId: null,
         notice: null,
       }
@@ -178,7 +178,7 @@ function handlePlayerAttack(state: GameState, coord: Coord): GameState {
   })
   const won = allShipsSunk(attack.board)
   if (won) {
-    log = addLog({ ...state, log }, { actor: 'player', kind: 'win', text: 'You beat every competitor!' })
+    log = addLog({ ...state, log }, { actor: 'player', kind: 'win', text: "Congratulations! You've Beaten the Competition!" })
   }
   return {
     ...state,
@@ -207,7 +207,7 @@ function handleAIAttack(state: GameState, coord: Coord, gameId: number): GameSta
     shipId: attack.sunkShip?.id,
     shipName: attack.sunkShip?.name,
     text: attack.sunkShip
-      ? `The enemy eliminated your ${attack.sunkShip.name} at ${label}!`
+      ? `The enemy sank your ${attack.sunkShip.name} at ${label}!`
       : attack.result === 'hit'
         ? `The enemy hit your ${ship?.name ?? 'ship'} at ${label}.`
         : `The enemy missed at ${label}.`,

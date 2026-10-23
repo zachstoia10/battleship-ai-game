@@ -42,7 +42,7 @@ describe('ship placement', () => {
     expect(result.ok).toBe(true)
     if (!result.ok) return
     expect(result.board.ships).toHaveLength(1)
-    expect(shipAt(result.board, { row: 0, col: 4 })?.id).toBe('copilot')
+    expect(shipAt(result.board, { row: 0, col: 4 })?.id).toBe('carrier')
     expect(shipAt(result.board, { row: 0, col: 5 })).toBeUndefined()
     expect(board.ships).toHaveLength(0)
   })
@@ -85,7 +85,7 @@ describe('ship placement', () => {
     if (!moved.ok) return
     expect(moved.board.ships).toHaveLength(1)
     expect(shipAt(moved.board, { row: 0, col: 0 })).toBeUndefined()
-    expect(shipAt(moved.board, { row: 0, col: 6 })?.id).toBe('copilot')
+    expect(shipAt(moved.board, { row: 0, col: 6 })?.id).toBe('carrier')
   })
 
   it('validatePlacement reports out-of-bounds before overlap', () => {
@@ -96,8 +96,8 @@ describe('ship placement', () => {
   })
 
   it('removes a ship', () => {
-    const board = removeShip(buildFleetBoard(), 'claude-code')
-    expect(board.ships.map((s) => s.id)).not.toContain('claude-code')
+    const board = removeShip(buildFleetBoard(), 'cruiser')
+    expect(board.ships.map((s) => s.id)).not.toContain('cruiser')
     expect(isFleetComplete(board)).toBe(false)
   })
 

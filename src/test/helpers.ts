@@ -1,5 +1,5 @@
 import { createEmptyBoard, placeShip } from '../game/board'
-import { FLEET, type Board, type Coord, type Orientation } from '../game/types'
+import { FLEET, type Board, type Coord, type Orientation, type ShipDefinition } from '../game/types'
 
 /** Deterministic seeded RNG (mulberry32) for reproducible tests. */
 export function seededRng(seed: number): () => number {
@@ -20,9 +20,10 @@ export function seededRng(seed: number): () => number {
  */
 export function buildFleetBoard(
   layout: Record<string, { start: Coord; orientation: Orientation }> = {},
+  fleet: readonly ShipDefinition[] = FLEET,
 ): Board {
   let board = createEmptyBoard()
-  FLEET.forEach((def, i) => {
+  fleet.forEach((def, i) => {
     const spec = layout[def.id] ?? { start: { row: i * 2, col: 0 }, orientation: 'horizontal' }
     const result = placeShip(board, def, spec.start, spec.orientation)
     if (!result.ok) throw new Error(`Invalid test layout for ${def.id}: ${result.reason}`)

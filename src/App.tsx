@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import cognitionMark from './assets/cognition-mark.svg'
 import { Board, type PlacementPreview } from './components/Board'
 import { EliminationBanner } from './components/EliminationBanner'
+import { CompetitorsRemaining } from './components/CompetitorsRemaining'
 import { FleetStatus } from './components/FleetStatus'
 import { GameLog } from './components/GameLog'
 import { PlacementPanel } from './components/PlacementPanel'
@@ -46,7 +47,7 @@ export default function App({ aiDelayMs }: AppProps) {
     else dispatch({ type: 'PLACE_SHIP', coord })
   }
 
-  const latestSink = state.log.find((e) => e.kind === 'sunk')
+  const latestElimination = state.log.find((e) => e.kind === 'sunk' && e.actor === 'player')
 
   const newGame = () => {
     setHover(null)
@@ -70,12 +71,19 @@ export default function App({ aiDelayMs }: AppProps) {
 
       <StatusBanner phase={phase} turn={turn} winner={state.winner} notice={state.notice} />
 
-      {latestSink && <EliminationBanner key={`${state.gameId}-${latestSink.id}`} entry={latestSink} />}
+      {latestElimination && (
+        <EliminationBanner
+          key={`${state.gameId}-${latestElimination.id}`}
+          entry={latestElimination}
+          victory={state.winner === 'player'}
+        />
+      )}
 
       <main className={`layout${placing ? ' layout--placement' : ''}`}>
         <section className="theater" aria-labelledby="player-heading">
-          <h2 id="player-heading" className="theater__title">
-            Your fleet
+          <h2 id="player-heading" className="theater__title theater__title--player">
+            <img className="theater__mark" src={cognitionMark} alt="" />
+            Cognition · Your fleet
           </h2>
           <Board
             board={playerBoard}
@@ -118,12 +126,13 @@ export default function App({ aiDelayMs }: AppProps) {
               onCellClick={(coord) => dispatch({ type: 'PLAYER_ATTACK', coord })}
               isCellDisabled={(c) => aiBoard.shots[c.row][c.col] !== null}
             />
-            <FleetStatus title="Competitors" board={aiBoard} showDamage={false} />
           </section>
         )}
       </main>
 
       {!placing && <GameLog entries={state.log} />}
+
+      <CompetitorsRemaining board={aiBoard} />
 
       <footer className="app__footer">Sink every competitor before they find your fleet.</footer>
     </div>
