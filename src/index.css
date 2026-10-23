@@ -97,6 +97,9 @@ h1, h2, h3 { margin: 0; font-family: var(--font-sans); font-weight: 500; letter-
 /* Layout */
 .layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 3vw, 32px); align-items: start; }
 .theater { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; }
+
+.theater__title--player { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--ink-2); }
+.theater__mark { width: 20px; height: 20px; }
 .theater__title {
   align-self: stretch; text-align: center; font-family: var(--font-mono); font-size: 0.85rem;
   font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted);
@@ -141,6 +144,12 @@ kbd { font-family: var(--font-mono); background: var(--surface-alt); border: 1px
 .cell--hit { background: #fff1f0; }
 
 /* Competitor hull: tinted cells with an outline that runs along the whole ship. */
+/* Your (Cognition) ships keep the classic steel hull; no logos. */
+.cell--ship { background: linear-gradient(145deg, #4a4a4a, var(--ink-2)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14); }
+.cell--ship:not(:disabled):hover { background: linear-gradient(145deg, #5a5a5a, #2a2a2a); }
+.cell--hit:not(.cell--competitor) { background: linear-gradient(145deg, #5a1f24, #2b1218); }
+.cell--sunk:not(.cell--competitor) { background: linear-gradient(145deg, #8f1d26, #4c1520); box-shadow: inset 0 0 0 1px rgba(250, 80, 80, 0.6); }
+
 .cell--competitor { --hull: var(--ink-2); background: var(--tint, var(--surface-alt)); }
 .cell--competitor.cell--h { box-shadow: inset 0 2px 0 var(--hull), inset 0 -2px 0 var(--hull); }
 .cell--competitor.cell--v { box-shadow: inset 2px 0 0 var(--hull), inset -2px 0 0 var(--hull); }
@@ -209,6 +218,26 @@ kbd { font-family: var(--font-mono); background: var(--surface-alt); border: 1px
 .fleet__ship--sunk .logo-chip { filter: grayscale(1); opacity: 0.5; }
 .fleet__ship--sunk .fleet__state { color: var(--hit-dark); }
 
+/* Competitors remaining */
+.rivals { margin-top: 24px; border-top: 3px solid var(--ink-2); }
+.rivals__header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; margin-bottom: 14px; }
+.rivals__count { margin: 0; font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--blue); }
+.rivals__count strong { font-size: 1.1rem; color: var(--ink); }
+.rivals__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.rival {
+  display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center;
+  padding: 10px 12px; border: 1px solid var(--line-strong); border-left: 3px solid var(--ok); border-radius: var(--radius);
+  background: var(--surface); transition: opacity 0.3s, border-color 0.3s;
+}
+.rival__logo { grid-row: span 2; display: grid; place-items: center; width: 34px; height: 34px; background: var(--surface-alt); border-radius: var(--radius); }
+.rival__logo img { width: 72%; height: 72%; object-fit: contain; }
+.rival__name { font-size: 0.92rem; font-weight: 500; line-height: 1.2; }
+.rival__state { font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ok); }
+.rival--eliminated { border-left-color: var(--hit); background: var(--bg); }
+.rival--eliminated .rival__name { text-decoration: line-through; color: var(--muted); }
+.rival--eliminated .rival__logo img { filter: grayscale(1); opacity: 0.45; }
+.rival--eliminated .rival__state { color: var(--hit-dark); }
+
 /* Log */
 .log { margin-top: 24px; }
 .log h3 { margin-bottom: 8px; }
@@ -228,9 +257,10 @@ kbd { font-family: var(--font-mono); background: var(--surface-alt); border: 1px
   position: relative; overflow: hidden; min-width: min(520px, 92vw); max-width: 92vw;
   padding: 18px 26px 22px; background: var(--ink-2); color: #fff; border-radius: var(--radius);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-  animation: elim-in 0.45s cubic-bezier(0.2, 0.9, 0.25, 1.2) both, elim-out 0.4s ease-in 2.2s forwards;
+  animation: elim-in 0.45s cubic-bezier(0.2, 0.9, 0.25, 1.2) both, elim-out 0.4s ease-in var(--elim-hold, 2.2s) forwards;
 }
-.elimination--ai .elimination__card { background: #2a0f0f; }
+.elimination--victory .elimination__card { background: var(--blue-950); }
+.elimination--victory .elimination__title { font-size: clamp(1.3rem, 4.2vw, 2rem); }
 .elimination__bars { position: absolute; top: 0; left: 0; right: 0; display: flex; height: 4px; }
 .elimination__bars span { flex: 1; transform-origin: left; animation: bar 0.5s ease-out both; }
 .elimination__bars span:nth-child(1) { background: var(--blue); animation-delay: 0.05s; }

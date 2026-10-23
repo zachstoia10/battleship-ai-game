@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createInitialState, gameReducer, type GameAction, type GameState } from './gameReducer'
 import { isFleetComplete } from './board'
-import { FLEET } from './types'
+import { ENEMY_FLEET, FLEET } from './types'
 import { buildFleetBoard } from '../test/helpers'
 
 function run(state: GameState, ...actions: GameAction[]): GameState {
@@ -12,24 +12,24 @@ function startedGame(): GameState {
   return run(
     createInitialState(),
     { type: 'RANDOMIZE_PLACEMENT', board: buildFleetBoard() },
-    { type: 'START_GAME', aiBoard: buildFleetBoard() },
+    { type: 'START_GAME', aiBoard: buildFleetBoard({}, ENEMY_FLEET) },
   )
 }
 
-const aiShipCells = () => buildFleetBoard().ships.flatMap((s) => s.cells)
+const aiShipCells = () => buildFleetBoard({}, ENEMY_FLEET).ships.flatMap((s) => s.cells)
 
 describe('placement phase', () => {
   it('starts in placement with the carrier selected', () => {
     const s = createInitialState()
     expect(s.phase).toBe('placement')
-    expect(s.selectedShipId).toBe('copilot')
+    expect(s.selectedShipId).toBe('carrier')
     expect(s.playerBoard.ships).toHaveLength(0)
   })
 
   it('places the selected ship and auto-selects the next unplaced ship', () => {
     const s = run(createInitialState(), { type: 'PLACE_SHIP', coord: { row: 0, col: 0 } })
-    expect(s.playerBoard.ships.map((x) => x.id)).toEqual(['copilot'])
-    expect(s.selectedShipId).toBe('cursor')
+    expect(s.playerBoard.ships.map((x) => x.id)).toEqual(['carrier'])
+    expect(s.selectedShipId).toBe('battleship')
   })
 
   it('rotates and places vertically', () => {
@@ -57,10 +57,10 @@ describe('placement phase', () => {
     const s = run(
       createInitialState(),
       { type: 'PLACE_SHIP', coord: { row: 0, col: 0 } },
-      { type: 'PICK_UP_SHIP', shipId: 'copilot' },
+      { type: 'PICK_UP_SHIP', shipId: 'carrier' },
     )
     expect(s.playerBoard.ships).toHaveLength(0)
-    expect(s.selectedShipId).toBe('copilot')
+    expect(s.selectedShipId).toBe('carrier')
   })
 
   it('randomizes and clears placement', () => {
@@ -81,7 +81,10 @@ describe('placement phase', () => {
     const s = run(createInitialState(), { type: 'RANDOMIZE_PLACEMENT' }, { type: 'START_GAME' })
     expect(s.phase).toBe('playing')
     expect(s.turn).toBe('player')
-    expect(isFleetComplete(s.aiBoard)).toBe(true)
+    expect(isFleetComplete(s.aiBoard, ENEMY_FLEET)).toBe(true)
+    // The AI's ships are the competitors; the player's keep their classic names.
+    expect(s.aiBoard.ships.map((x) => x.name)).toEqual(ENEMY_FLEET.map((d) => d.name))
+    expect(s.playerBoard.ships.map((x) => x.name)).toEqual(FLEET.map((d) => d.name))
   })
 
   it('ignores attacks during placement and placement actions during play', () => {
@@ -162,6 +165,7 @@ describe('win detection and game over', () => {
     expect(s.phase).toBe('gameOver')
     expect(s.winner).toBe('player')
     expect(s.log[0].kind).toBe('win')
+    expect(s.log[0].text).toBe("Congratulations! You've Beaten the Competition!")
   })
 
   it('declares the AI the winner after sinking all player ships', () => {
@@ -173,6 +177,7 @@ describe('win detection and game over', () => {
     })
     expect(s.phase).toBe('gameOver')
     expect(s.winner).toBe('ai')
+    expect(s.log.find((e) => e.kind === 'sunk')?.text).toBe('The enemy sank Adam Achebe at B9!')
   })
 
   it('rejects all attacks after the game ends', () => {
@@ -202,7 +207,7 @@ describe('new game', () => {
       old,
       { type: 'NEW_GAME' },
       { type: 'RANDOMIZE_PLACEMENT', board: buildFleetBoard() },
-      { type: 'START_GAME', aiBoard: buildFleetBoard() },
+      { type: 'START_GAME', aiBoard: buildFleetBoard({}, ENEMY_FLEET) },
       { type: 'PLAYER_ATTACK', coord: { row: 5, col: 5 } },
     )
     expect(next.turn).toBe('ai')

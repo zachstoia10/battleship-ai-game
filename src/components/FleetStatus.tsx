@@ -1,4 +1,3 @@
-import { brandFor } from '../branding/competitors'
 import { isShipSunk } from '../game/attack'
 import { FLEET, type Board } from '../game/types'
 import { ShipPips } from './ShipPips'
@@ -6,7 +5,6 @@ import { ShipPips } from './ShipPips'
 interface FleetStatusProps {
   title: string
   board: Board
-  /** Show per-ship damage. Only for your own fleet, so enemy hits aren't leaked. */
   showDamage: boolean
 }
 
@@ -30,12 +28,9 @@ export function FleetStatus({ title, board, showDamage }: FleetStatusProps) {
       <ul className="fleet__list">
         {ships.map(({ def, hits, sunk }) => (
           <li key={def.id} className={`fleet__ship${sunk ? ' fleet__ship--sunk' : ''}`}>
-            <span className="fleet__name">
-              <img className="logo-chip" src={brandFor(def.id)?.logo} alt="" />
-              {def.name}
-            </span>
+            <span className="fleet__name">{def.name}</span>
             <ShipPips length={def.length} hits={showDamage || sunk ? hits : 0} sunk={sunk} />
-            <span className="fleet__state">{sunk ? 'Eliminated' : 'Afloat'}</span>
+            <span className="fleet__state">{sunk ? 'Sunk' : 'Afloat'}</span>
           </li>
         ))}
       </ul>
