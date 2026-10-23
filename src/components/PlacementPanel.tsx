@@ -1,5 +1,6 @@
 import { FLEET, type Board, type Orientation } from '../game/types'
 import { isFleetComplete } from '../game/board'
+import { brandFor } from '../branding/competitors'
 import { ShipPips } from './ShipPips'
 
 interface PlacementPanelProps {
@@ -29,7 +30,7 @@ export function PlacementPanel({
     <section className="panel placement" aria-labelledby="placement-heading">
       <h2 id="placement-heading">Deploy your fleet</h2>
       <p className="panel__hint">
-        Select a ship, then click your board to place it. Click a placed ship to pick it back
+        Select a competitor, then click your board to place it. Click a placed competitor to pick it back
         up. Press <kbd>R</kbd> to rotate.
       </p>
       <ul className="placement__ships">
@@ -44,7 +45,10 @@ export function PlacementPanel({
                 aria-pressed={selected}
                 onClick={() => onSelectShip(def.id)}
               >
-                <span className="ship-option__name">{def.name}</span>
+                <span className="ship-option__name">
+                  <img className="logo-chip" src={brandFor(def.id)?.logo} alt="" />
+                  {def.name}
+                </span>
                 <ShipPips length={def.length} />
                 <span className="ship-option__state">{placed ? 'Placed' : selected ? 'Selected' : ''}</span>
               </button>

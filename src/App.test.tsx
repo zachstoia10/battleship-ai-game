@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { ELIMINATION_BANNER_MS } from './components/EliminationBanner'
 import { buildFleetBoard } from './test/helpers'
 
 // Make every "random" fleet the known layout from buildFleetBoard so the
@@ -101,7 +102,7 @@ describe('App', () => {
   it('shows hits, sunk ships and remaining counts, then declares the winner', () => {
     render(<App aiDelayMs={AI_DELAY} />)
     startRandomGame()
-    const remaining = () => screen.getByTestId('Enemy ships-remaining').textContent
+    const remaining = () => screen.getByTestId('Competitors-remaining').textContent
 
     fireEvent.click(cell('Enemy waters', 'A9'))
     expect(cell('Enemy waters', 'A9')).toHaveAttribute('data-status', 'hit')
@@ -109,7 +110,7 @@ describe('App', () => {
     fireEvent.click(cell('Enemy waters', 'B9'))
     expect(cell('Enemy waters', 'A9')).toHaveAttribute('data-status', 'sunk')
     expect(remaining()).toBe('4 / 5 afloat')
-    expect(screen.getByText('You sank the enemy Destroyer at B9!')).toBeInTheDocument()
+    expect(screen.getByText('You eliminated Google Gemini Code Assist at B9!')).toBeInTheDocument()
     finishAITurn()
 
     for (const coord of SHIP_COORDS.filter((c) => c !== 'A9' && c !== 'B9')) {
@@ -137,5 +138,84 @@ describe('App', () => {
     const yourCells = within(screen.getByRole('group', { name: 'Your waters' })).getAllByRole('button')
     expect(yourCells).toHaveLength(100)
     yourCells.forEach((b) => expect(b).toHaveAttribute('data-status', 'empty'))
+  })
+
+  it('renders competitor logos along horizontal and vertical ships', () => {
+    render(<App aiDelayMs={AI_DELAY} />)
+    // GitHub Copilot (5) horizontally from A1.
+    fireEvent.click(cell('Your waters', 'A1'))
+    const row = ['A1', 'B1', 'C1', 'D1', 'E1']
+    row.forEach((c, i) => {
+      const el = cell('Your waters', c)
+      expect(el).toHaveAttribute('data-ship', 'copilot')
+      expect(el).toHaveClass('cell--h')
+      expect(el).toHaveClass(i === 0 ? 'cell--seg-start' : i === row.length - 1 ? 'cell--seg-end' : 'cell--seg-middle')
+      expect(el.querySelector('img.cell__logo')).not.toBeNull()
+    })
+    expect(cell('Your waters', 'F1')).not.toHaveAttribute('data-ship')
+
+    // Cursor (4) vertically down column J.
+    fireEvent.click(screen.getByRole('button', { name: /Rotate/ }))
+    fireEvent.click(cell('Your waters', 'J2'))
+    const col = ['J2', 'J3', 'J4', 'J5']
+    col.forEach((c, i) => {
+      const el = cell('Your waters', c)
+      expect(el).toHaveAttribute('data-ship', 'cursor')
+      expect(el).toHaveClass('cell--v')
+      expect(el).toHaveClass(i === 0 ? 'cell--seg-start' : i === col.length - 1 ? 'cell--seg-end' : 'cell--seg-middle')
+      expect(el.querySelector('img.cell__logo')).not.toBeNull()
+    })
+  })
+
+  it('keeps enemy competitors hidden until hit, then shows the logo under the red marker', () => {
+    render(<App aiDelayMs={AI_DELAY} />)
+    startRandomGame()
+    for (const c of SHIP_COORDS) {
+      expect(cell('Enemy waters', c)).not.toHaveAttribute('data-ship')
+      expect(cell('Enemy waters', c).querySelector('img')).toBeNull()
+    }
+
+    fireEvent.click(cell('Enemy waters', 'A1'))
+    const hit = cell('Enemy waters', 'A1')
+    expect(hit).toHaveAttribute('data-status', 'hit')
+    expect(hit).toHaveAttribute('data-ship', 'copilot')
+    // A lone hit must not reveal which way the ship runs.
+    expect(hit).toHaveClass('cell--isolated')
+    expect(hit).not.toHaveClass('cell--h')
+    expect(hit).not.toHaveClass('cell--v')
+    const [logo, marker] = Array.from(hit.children)
+    expect(logo).toHaveClass('cell__logo')
+    expect(marker).toHaveClass('cell__marker--hit')
+    // Neighbouring cells of the same ship stay hidden.
+    expect(cell('Enemy waters', 'B1')).not.toHaveAttribute('data-ship')
+    // Misses are unchanged: no logo.
+    finishAITurn()
+    fireEvent.click(cell('Enemy waters', 'J10'))
+    expect(cell('Enemy waters', 'J10').querySelector('img')).toBeNull()
+    expect(cell('Enemy waters', 'J10').querySelector('.cell__marker--miss')).not.toBeNull()
+  })
+
+  it('announces each eliminated competitor by name', () => {
+    render(<App aiDelayMs={AI_DELAY} />)
+    startRandomGame()
+    fireEvent.click(cell('Enemy waters', 'A9'))
+    expect(screen.queryByTestId('elimination')).not.toBeInTheDocument()
+    finishAITurn()
+    fireEvent.click(cell('Enemy waters', 'B9'))
+    expect(screen.getByRole('alert')).toHaveTextContent('Google Gemini Code Assist Eliminated!')
+    // Once sunk, the whole hull outline is shown.
+    expect(cell('Enemy waters', 'A9')).toHaveClass('cell--h', 'cell--seg-start')
+    expect(cell('Enemy waters', 'B9')).toHaveClass('cell--h', 'cell--seg-end')
+
+    act(() => {
+      vi.advanceTimersByTime(ELIMINATION_BANNER_MS)
+    })
+    expect(screen.queryByTestId('elimination')).not.toBeInTheDocument()
+
+    for (const c of ['A7', 'B7', 'C7']) {
+      finishAITurn()
+      fireEvent.click(cell('Enemy waters', c))
+    }
+    expect(screen.getByRole('alert')).toHaveTextContent('OpenAI Codex Eliminated!')
   })
 })

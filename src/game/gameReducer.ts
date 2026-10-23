@@ -17,6 +17,9 @@ export interface LogEntry {
   actor: Player
   text: string
   kind: 'hit' | 'miss' | 'sunk' | 'win'
+  /** Set on 'sunk' entries: the competitor that was eliminated. */
+  shipId?: string
+  shipName?: string
 }
 
 export interface GameState {
@@ -165,15 +168,17 @@ function handlePlayerAttack(state: GameState, coord: Coord): GameState {
   let log = addLog(state, {
     actor: 'player',
     kind: attack.sunkShip ? 'sunk' : attack.result,
+    shipId: attack.sunkShip?.id,
+    shipName: attack.sunkShip?.name,
     text: attack.sunkShip
-      ? `You sank the enemy ${attack.sunkShip.name} at ${label}!`
+      ? `You eliminated ${attack.sunkShip.name} at ${label}!`
       : attack.result === 'hit'
         ? `You hit at ${label}.`
         : `You missed at ${label}.`,
   })
   const won = allShipsSunk(attack.board)
   if (won) {
-    log = addLog({ ...state, log }, { actor: 'player', kind: 'win', text: 'You sank the entire enemy fleet!' })
+    log = addLog({ ...state, log }, { actor: 'player', kind: 'win', text: 'You beat every competitor!' })
   }
   return {
     ...state,
@@ -199,8 +204,10 @@ function handleAIAttack(state: GameState, coord: Coord, gameId: number): GameSta
   let log = addLog(state, {
     actor: 'ai',
     kind: attack.sunkShip ? 'sunk' : attack.result,
+    shipId: attack.sunkShip?.id,
+    shipName: attack.sunkShip?.name,
     text: attack.sunkShip
-      ? `The enemy sank your ${attack.sunkShip.name} at ${label}!`
+      ? `The enemy eliminated your ${attack.sunkShip.name} at ${label}!`
       : attack.result === 'hit'
         ? `The enemy hit your ${ship?.name ?? 'ship'} at ${label}.`
         : `The enemy missed at ${label}.`,

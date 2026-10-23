@@ -3,7 +3,7 @@ import type { LogEntry } from '../game/gameReducer'
 export function GameLog({ entries }: { entries: LogEntry[] }) {
   return (
     <section className="panel log" aria-labelledby="log-heading">
-      <h3 id="log-heading">Captain's log</h3>
+      <h3 id="log-heading">Battle log</h3>
       {entries.length === 0 ? (
         <p className="panel__hint">No shots fired yet.</p>
       ) : (

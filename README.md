@@ -1,18 +1,24 @@
-# Battleship
+# Beat the Competitors
 
-A single-player Battleship game against a computer opponent, built with React, TypeScript and Vite. It is a fully static site (no backend, accounts or APIs) and is ready to deploy on Netlify.
+A Cognition-themed Battleship game: sink five competing AI coding products before the computer sinks yours. Built with React, TypeScript and Vite. It is a fully static site (no backend, accounts or APIs) and is ready to deploy on Netlify.
 
 ## How to play
 
-1. **Deploy your fleet.** Choose a ship from the panel and click a cell on *Your fleet* to place it (the clicked cell is the bow; ships extend right or down). A green preview means the spot is valid, red means it overlaps or runs off the board.
+1. **Deploy your fleet.** Choose a ship from the panel and click a cell on *Your fleet* to place it (the clicked cell is the bow; ships extend right or down). A blue preview (with the competitor's logo) means the spot is valid, red means it overlaps or runs off the board.
    - **Rotate** button or the <kbd>R</kbd> key switches horizontal/vertical.
    - **Randomize** places the whole fleet for you; **Clear** removes every ship.
    - Click a placed ship (on the board or in the list) to pick it up and move it.
-2. **Start battle** unlocks once all five ships are placed (Carrier 5, Battleship 4, Cruiser 3, Submarine 3, Destroyer 2). The enemy fleet is placed at random and stays hidden.
-3. **Fire** by clicking a cell on *Enemy waters*. Turns strictly alternate: you, then the computer, whether or not a shot hits.
-4. The status banner shows whose turn it is. Red bursts are hits, dots are misses, dark-red cells are sunk ships, and the gold outline marks the most recent shot on each board. The fleet panels show how many ships remain, and the Captain's log records every shot.
+2. **Start battle** unlocks once all five ships are placed (GitHub Copilot 5, Cursor 4, Claude Code 3, OpenAI Codex 3, Google Gemini Code Assist 2). The enemy fleet is placed at random and stays hidden.
+3. **Fire** by clicking a cell on *Competitor waters*. Turns strictly alternate: you, then the computer, whether or not a shot hits.
+4. The status banner shows whose turn it is. Every ship shows its competitor's logo in each cell it covers, horizontally or vertically. A hit reveals that cell's logo with the red hit marker on top; unhit enemy cells stay hidden, and a lone hit doesn't show which way the ship runs. Grey dots are misses, and the blue outline marks the most recent shot on each board. When a ship is fully sunk its outline appears and a "<Competitor> Eliminated!" banner animates in. The fleet panels show how many ships remain, and the Battle log records every shot.
 5. The first side to sink all five enemy ships wins. Remaining enemy ships are revealed at the end.
 6. **New game** resets everything at any point, even mid-battle.
+
+## Branding
+
+- Colours, type and layout follow [cognition.com](https://cognition.com/): warm off-white `#f7f6f5` canvas, black ink, `#191919` buttons and dark status surfaces, hairline borders, and Cognition's blue `#193cb8`, amber `#fcbb00`, orange `#9f2d00`, purple `#6e11b0` and red `#fa5050` accents.
+- Cognition's own fonts are licensed, so the game uses the open-source Geist and Geist Mono (bundled via `@fontsource-variable`) with a Georgia serif for body copy.
+- Competitor logos live in `src/assets/logos/` and are mapped to ship ids in `src/branding/competitors.ts`. The game rules in `src/game/` only know ship ids, names and lengths.
 
 ## How it works
 
@@ -26,7 +32,8 @@ src/
     ai.ts               Hunt-and-target computer opponent
     gameReducer.ts      Game state machine (placement → playing → gameOver)
   hooks/useBattleship.ts  useReducer + timer effect that plays the AI's turn
-  components/           Board, Cell, PlacementPanel, FleetStatus, StatusBanner, GameLog, ShipPips
+  branding/competitors.ts Logo and tint for each competitor ship
+  components/           Board, Cell, PlacementPanel, FleetStatus, StatusBanner, EliminationBanner, GameLog, ShipPips
   App.tsx               Page layout and wiring
 ```
 
@@ -56,7 +63,7 @@ npm run preview    # serve the production build locally
 - `attack.test.ts`: hits, misses, repeated and off-board attacks, sinking, win detection
 - `ai.test.ts`: hunt parity, neighbour targeting, line extension, return to hunting, full simulated games with no repeated shots
 - `gameReducer.test.ts`: placement rules, turn order, duplicate attacks, win/lose, no moves after game over, new game mid-game and after game over, stale AI moves
-- `App.test.tsx`: UI integration tests covering manual and invalid placement, turn alternation, sinking, the victory screen, and resetting mid-game while the AI's move is pending
+- `App.test.tsx`: UI integration tests covering manual and invalid placement, turn alternation, sinking, the victory screen, resetting mid-game while the AI's move is pending, competitor logos on horizontal and vertical ships, hidden enemy logos until hit, and elimination banners
 
 ## Deploying to Netlify (from GitHub)
 
@@ -70,7 +77,7 @@ The repo includes `netlify.toml`, so Netlify picks up the settings automatically
 
 1. Push this project to a GitHub repository:
    ```bash
-   git remote add origin https://github.com/<you>/battleship.git
+   git remote add origin https://github.com/<you>/battleship-ai-game.git
    git push -u origin main
    ```
 2. In Netlify, choose **Add new site → Import an existing project → GitHub** and select the repository.

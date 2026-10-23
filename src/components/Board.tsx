@@ -1,12 +1,14 @@
 import { COLUMN_LABELS, coordKey, formatCoord, sameCoord } from '../game/coords'
 import { isShipSunk } from '../game/attack'
 import { shipAt } from '../game/board'
-import { BOARD_SIZE, type Board as BoardModel, type Coord } from '../game/types'
-import { Cell, type CellStatus } from './Cell'
+import { BOARD_SIZE, type Board as BoardModel, type Coord, type Ship } from '../game/types'
+import { brandFor } from '../branding/competitors'
+import { Cell, type CellShip, type CellStatus } from './Cell'
 
 export interface PlacementPreview {
   cells: Coord[]
   valid: boolean
+  shipId?: string
 }
 
 interface BoardProps {
@@ -30,6 +32,25 @@ function getStatus(board: BoardModel, coord: Coord, showShips: boolean): CellSta
   return ship && showShips ? 'ship' : 'empty'
 }
 
+function toCellShip(ship: Ship, coord: Coord, revealShape: boolean): CellShip | null {
+  const brand = brandFor(ship.id)
+  if (!brand) return null
+  const index = ship.cells.findIndex((c) => sameCoord(c, coord))
+  const last = ship.cells.length - 1
+  return {
+    id: ship.id,
+    name: ship.name,
+    logo: brand.logo,
+    tint: brand.tint,
+    shape: revealShape
+      ? {
+          orientation: last > 0 && ship.cells[0].row === ship.cells[1].row ? 'horizontal' : 'vertical',
+          segment: index === 0 ? 'start' : index === last ? 'end' : 'middle',
+        }
+      : undefined,
+  }
+}
+
 export function Board({
   board,
   label,
@@ -42,6 +63,7 @@ export function Board({
   isCellDisabled,
 }: BoardProps) {
   const previewKeys = new Set(preview?.cells.map(coordKey))
+  const ghostLogo = preview?.valid && preview.shipId ? brandFor(preview.shipId)?.logo : null
 
   return (
     <div
@@ -62,6 +84,8 @@ export function Board({
             const coord = { row, col }
             const status = getStatus(board, coord, showShips)
             const inPreview = previewKeys.has(coordKey(coord))
+            // Unhit enemy cells report 'empty', so their competitor is never revealed.
+            const ship = status === 'empty' || status === 'miss' ? undefined : shipAt(board, coord)
             return (
               <Cell
                 key={col}
@@ -69,6 +93,8 @@ export function Board({
                 label={`${label} ${formatCoord(coord)}`}
                 preview={inPreview ? (preview?.valid ? 'valid' : 'invalid') : null}
                 isLastShot={!!lastShot && sameCoord(lastShot, coord)}
+                ship={ship ? toCellShip(ship, coord, showShips || status === 'sunk') : null}
+                ghostLogo={inPreview ? ghostLogo : null}
                 disabled={disabled || !onCellClick || (isCellDisabled?.(coord) ?? false)}
                 onClick={() => onCellClick?.(coord)}
                 onHover={() => onCellHover?.(coord)}
