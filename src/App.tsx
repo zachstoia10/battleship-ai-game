@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import cognitionMark from './assets/cognition-mark.svg'
 import { Board, type PlacementPreview } from './components/Board'
+import { EliminationBanner } from './components/EliminationBanner'
 import { FleetStatus } from './components/FleetStatus'
 import { GameLog } from './components/GameLog'
 import { PlacementPanel } from './components/PlacementPanel'
@@ -44,6 +46,8 @@ export default function App({ aiDelayMs }: AppProps) {
     else dispatch({ type: 'PLACE_SHIP', coord })
   }
 
+  const latestSink = state.log.find((e) => e.kind === 'sunk')
+
   const newGame = () => {
     setHover(null)
     dispatch({ type: 'NEW_GAME' })
@@ -53,13 +57,11 @@ export default function App({ aiDelayMs }: AppProps) {
     <div className="app">
       <header className="app__header">
         <div className="brand">
-          <svg className="brand__icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M12 2a2 2 0 0 1 1 3.73V8h3v2h-3v9.93A8 8 0 0 0 19.93 14H18l3-4 3 4h-2.05A10 10 0 0 1 2.05 14H0l3-4 3 4H4.07A8 8 0 0 0 11 19.93V10H8V8h3V5.73A2 2 0 0 1 12 2Z"
-              fill="currentColor"
-            />
-          </svg>
-          <h1>Battleship</h1>
+          <img className="brand__icon" src={cognitionMark} alt="Cognition" />
+          <div className="brand__text">
+            <span className="brand__eyebrow">Cognition</span>
+            <h1>Beat the Competitors</h1>
+          </div>
         </div>
         <button type="button" className="btn btn--primary" onClick={newGame}>
           New game
@@ -67,6 +69,8 @@ export default function App({ aiDelayMs }: AppProps) {
       </header>
 
       <StatusBanner phase={phase} turn={turn} winner={state.winner} notice={state.notice} />
+
+      {latestSink && <EliminationBanner key={`${state.gameId}-${latestSink.id}`} entry={latestSink} />}
 
       <main className={`layout${placing ? ' layout--placement' : ''}`}>
         <section className="theater" aria-labelledby="player-heading">
@@ -103,7 +107,7 @@ export default function App({ aiDelayMs }: AppProps) {
         ) : (
           <section className="theater" aria-labelledby="enemy-heading">
             <h2 id="enemy-heading" className="theater__title">
-              Enemy waters
+              Competitor waters
             </h2>
             <Board
               board={aiBoard}
@@ -114,14 +118,14 @@ export default function App({ aiDelayMs }: AppProps) {
               onCellClick={(coord) => dispatch({ type: 'PLAYER_ATTACK', coord })}
               isCellDisabled={(c) => aiBoard.shots[c.row][c.col] !== null}
             />
-            <FleetStatus title="Enemy ships" board={aiBoard} showDamage={false} />
+            <FleetStatus title="Competitors" board={aiBoard} showDamage={false} />
           </section>
         )}
       </main>
 
       {!placing && <GameLog entries={state.log} />}
 
-      <footer className="app__footer">Hunt the enemy fleet before they find yours.</footer>
+      <footer className="app__footer">Sink every competitor before they find your fleet.</footer>
     </div>
   )
 }

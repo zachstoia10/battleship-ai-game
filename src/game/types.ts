@@ -28,9 +28,9 @@ export interface Board {
 export type Player = 'player' | 'ai'
 
 export const FLEET: readonly ShipDefinition[] = [
-  { id: 'carrier', name: 'Carrier', length: 5 },
-  { id: 'battleship', name: 'Battleship', length: 4 },
-  { id: 'cruiser', name: 'Cruiser', length: 3 },
-  { id: 'submarine', name: 'Submarine', length: 3 },
-  { id: 'destroyer', name: 'Destroyer', length: 2 },
+  { id: 'copilot', name: 'GitHub Copilot', length: 5 },
+  { id: 'cursor', name: 'Cursor', length: 4 },
+  { id: 'claude-code', name: 'Claude Code', length: 3 },
+  { id: 'codex', name: 'OpenAI Codex', length: 3 },
+  { id: 'gemini', name: 'Google Gemini Code Assist', length: 2 },
 ]

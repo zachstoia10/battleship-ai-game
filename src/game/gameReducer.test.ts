@@ -22,14 +22,14 @@ describe('placement phase', () => {
   it('starts in placement with the carrier selected', () => {
     const s = createInitialState()
     expect(s.phase).toBe('placement')
-    expect(s.selectedShipId).toBe('carrier')
+    expect(s.selectedShipId).toBe('copilot')
     expect(s.playerBoard.ships).toHaveLength(0)
   })
 
   it('places the selected ship and auto-selects the next unplaced ship', () => {
     const s = run(createInitialState(), { type: 'PLACE_SHIP', coord: { row: 0, col: 0 } })
-    expect(s.playerBoard.ships.map((x) => x.id)).toEqual(['carrier'])
-    expect(s.selectedShipId).toBe('battleship')
+    expect(s.playerBoard.ships.map((x) => x.id)).toEqual(['copilot'])
+    expect(s.selectedShipId).toBe('cursor')
   })
 
   it('rotates and places vertically', () => {
@@ -57,10 +57,10 @@ describe('placement phase', () => {
     const s = run(
       createInitialState(),
       { type: 'PLACE_SHIP', coord: { row: 0, col: 0 } },
-      { type: 'PICK_UP_SHIP', shipId: 'carrier' },
+      { type: 'PICK_UP_SHIP', shipId: 'copilot' },
     )
     expect(s.playerBoard.ships).toHaveLength(0)
-    expect(s.selectedShipId).toBe('carrier')
+    expect(s.selectedShipId).toBe('copilot')
   })
 
   it('randomizes and clears placement', () => {
@@ -133,7 +133,7 @@ describe('turn management', () => {
     s = run(s, { type: 'AI_ATTACK', coord: { row: 9, col: 9 }, gameId: s.gameId })
     s = run(s, { type: 'PLAYER_ATTACK', coord: { row: 8, col: 1 } })
     expect(s.log.map((e) => e.text)).toEqual([
-      'You sank the enemy Destroyer at B9!',
+      'You eliminated Google Gemini Code Assist at B9!',
       'The enemy missed at J10.',
       'You hit at A9.',
     ])
