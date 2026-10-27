@@ -18,7 +18,7 @@ A Cognition-themed Battleship game: sink five competing AI coding products befor
 
 - Colours, type and layout follow [cognition.com](https://cognition.com/): warm off-white `#f7f6f5` canvas, black ink, `#191919` buttons and dark status surfaces, hairline borders, and Cognition's blue `#193cb8`, amber `#fcbb00`, orange `#9f2d00`, purple `#6e11b0` and red `#fa5050` accents.
 - Cognition's own fonts are licensed, so the game uses the open-source Geist and Geist Mono (bundled via `@fontsource-variable`) with a Georgia serif for body copy.
-- Boards are deep Cognition-blue water with glowing grid lines. Your ships are drawn as single rounded steel hulls, shots flash (hit) or ripple (miss), sunk ships shake, the Competitors Remaining cards get an "Eliminated" stamp under a progress bar, and the final win drops confetti. All motion is turned off under `prefers-reduced-motion`.
+- Boards are deep Cognition-blue water with glowing grid lines. Your ships are drawn as side-view warships (carrier, battleship, cruiser, submarine, destroyer) spanning their cells, shots flash (hit) or ripple (miss), sunk ships shake, the Competitors Remaining cards get an "Eliminated" stamp under a progress bar, and the final win drops confetti. All motion is turned off under `prefers-reduced-motion`.
 - The player uses `FLEET` and the AI uses `ENEMY_FLEET` (both in `src/game/types.ts`, identical lengths). Competitor logos live in `src/assets/logos/` and are mapped to the AI's ship ids in `src/branding/competitors.ts`. The game rules in `src/game/` only know ship ids, names and lengths.
 
 ## How it works

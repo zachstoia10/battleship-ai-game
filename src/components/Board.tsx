@@ -3,7 +3,8 @@ import { isShipSunk } from '../game/attack'
 import { shipAt } from '../game/board'
 import { BOARD_SIZE, type Board as BoardModel, type Coord, type Ship } from '../game/types'
 import { brandFor } from '../branding/competitors'
-import { Cell, type CellShip, type CellStatus, type ShipShape } from './Cell'
+import { shipArt } from './shipArt'
+import { Cell, type CellShip, type CellStatus, type ShipHull, type ShipShape } from './Cell'
 
 export interface PlacementPreview {
   cells: Coord[]
@@ -37,6 +38,16 @@ function shapeOf(ship: Ship, coord: Coord): ShipShape {
   return {
     orientation: last > 0 && ship.cells[0].row === ship.cells[1].row ? 'horizontal' : 'vertical',
     segment: index === 0 ? 'start' : index === last ? 'end' : 'middle',
+  }
+}
+
+function hullOf(ship: Ship, coord: Coord): ShipHull {
+  const shape = shapeOf(ship, coord)
+  return {
+    ...shape,
+    art: shipArt(ship.id, ship.cells.length, shape.orientation),
+    index: ship.cells.findIndex((c) => sameCoord(c, coord)),
+    length: ship.cells.length,
   }
 }
 
@@ -86,8 +97,8 @@ export function Board({
             const inPreview = previewKeys.has(coordKey(coord))
             // Unhit enemy cells report 'empty', so their competitor is never revealed.
             const ship = status === 'empty' || status === 'miss' ? undefined : shipAt(board, coord)
-            // Your own (unbranded) ships are drawn as one continuous hull.
-            const hull = ship && showShips && !brandFor(ship.id) ? shapeOf(ship, coord) : null
+            // Your own (unbranded) ships are drawn as one warship spanning their cells.
+            const hull = ship && showShips && !brandFor(ship.id) ? hullOf(ship, coord) : null
             return (
               <Cell
                 key={col}

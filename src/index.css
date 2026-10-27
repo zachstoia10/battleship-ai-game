@@ -173,27 +173,14 @@ kbd { font-family: var(--font-mono); background: var(--surface-alt); border: 1px
 .cell--hit:not(.cell--competitor), .cell--sunk:not(.cell--competitor) { background: var(--water); }
 .cell--ship:not(:disabled):hover .cell__hull { filter: brightness(1.2); }
 
-/* One continuous rounded hull: each segment reaches across the grid gap into the next cell. */
+/* Each cell shows its slice of one full warship drawing; slices reach across the grid gap. */
 .cell__hull {
-  --h1: #d3d9e3; --h2: #8f98a8; --h3: #4b5361; --h4: #262b34;
-  position: absolute; pointer-events: none; transition: filter 0.15s;
+  position: absolute; inset: 0; pointer-events: none;
+  background-repeat: no-repeat; transition: filter 0.15s;
 }
-.cell__hull--h {
-  top: 17%; bottom: 17%; left: 0; right: -2px;
-  background: linear-gradient(180deg, var(--h1), var(--h2) 26%, var(--h3) 68%, var(--h4));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -1px 0 rgba(0, 0, 0, 0.45);
-}
-.cell__hull--h.cell__hull--start { left: 10%; border-radius: 999px 0 0 999px; box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.4), inset 0 -1px 0 rgba(0, 0, 0, 0.45); }
-.cell__hull--h.cell__hull--end { right: 10%; border-radius: 0 999px 999px 0; }
-.cell__hull--v {
-  left: 17%; right: 17%; top: 0; bottom: -2px;
-  background: linear-gradient(90deg, var(--h1), var(--h2) 26%, var(--h3) 68%, var(--h4));
-  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.4), inset -1px 0 0 rgba(0, 0, 0, 0.45);
-}
-.cell__hull--v.cell__hull--start { top: 10%; border-radius: 999px 999px 0 0; box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.4), inset -1px 0 0 rgba(0, 0, 0, 0.45); }
-.cell__hull--v.cell__hull--end { bottom: 10%; border-radius: 0 0 999px 999px; }
-.cell--hit .cell__hull { --h1: #e8b3b3; --h2: #a5545a; --h3: #66232a; --h4: #3a1217; }
-.cell--sunk .cell__hull { --h1: #8f5f63; --h2: #5c2a30; --h3: #3b1519; --h4: #220a0d; }
+.cell__hull--h { right: auto; width: calc(var(--cell) + 2px); }
+.cell__hull--v { bottom: auto; height: calc(var(--cell) + 2px); }
+.cell--sunk .cell__hull { filter: brightness(0.75) sepia(0.6) saturate(2) hue-rotate(-25deg); }
 
 .cell--competitor { --hull: var(--ink-2); background: var(--tint, var(--surface-alt)); }
 .cell--competitor.cell--h { box-shadow: inset 0 2px 0 var(--hull), inset 0 -2px 0 var(--hull); }

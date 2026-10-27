@@ -8,6 +8,13 @@ export interface ShipShape {
   segment: 'start' | 'middle' | 'end'
 }
 
+/** One cell's slice of one of your own ships, drawn as a single warship. */
+export interface ShipHull extends ShipShape {
+  art: string
+  index: number
+  length: number
+}
+
 /** Competitor ship segment shown in a cell. Only passed when the cell may reveal it. */
 export interface CellShip {
   id: string
@@ -25,8 +32,7 @@ interface CellProps {
   isLastShot: boolean
   disabled: boolean
   ship?: CellShip | null
-  /** Segment of one of your own ships, drawn as part of a single hull. */
-  hull?: ShipShape | null
+  hull?: ShipHull | null
   onClick: () => void
   onHover: () => void
 }
@@ -37,6 +43,16 @@ const STATUS_TEXT: Record<CellStatus, string> = {
   hit: 'hit',
   miss: 'miss',
   sunk: 'sunk',
+}
+
+function hullStyle({ art, index, length, orientation }: ShipHull): CSSProperties {
+  // One cell plus the 1px grid gap; slices overlap the next cell slightly to hide seams.
+  const step = 'calc(var(--cell) + 1px)'
+  const span = `calc(${step} * ${length})`
+  const offset = `calc(${step} * ${-index})`
+  return orientation === 'horizontal'
+    ? { backgroundImage: art, backgroundSize: `${span} 100%`, backgroundPosition: `${offset} 0` }
+    : { backgroundImage: art, backgroundSize: `100% ${span}`, backgroundPosition: `0 ${offset}` }
 }
 
 export function Cell({
@@ -79,6 +95,7 @@ export function Cell({
       {hull && (
         <span
           className={`cell__hull cell__hull--${hull.orientation === 'horizontal' ? 'h' : 'v'} cell__hull--${hull.segment}`}
+          style={hullStyle(hull)}
           aria-hidden="true"
         />
       )}
