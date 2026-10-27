@@ -3,6 +3,7 @@ import cognitionMark from './assets/cognition-mark.svg'
 import { Board, type PlacementPreview } from './components/Board'
 import { EliminationBanner } from './components/EliminationBanner'
 import { CompetitorsRemaining } from './components/CompetitorsRemaining'
+import { Confetti } from './components/Confetti'
 import { FleetStatus } from './components/FleetStatus'
 import { GameLog } from './components/GameLog'
 import { PlacementPanel } from './components/PlacementPanel'
@@ -78,6 +79,8 @@ export default function App({ aiDelayMs }: AppProps) {
           victory={state.winner === 'player'}
         />
       )}
+
+      {state.winner === 'player' && <Confetti key={state.gameId} />}
 
       <main className={`layout${placing ? ' layout--placement' : ''}`}>
         <section className="theater" aria-labelledby="player-heading">

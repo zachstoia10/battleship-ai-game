@@ -118,6 +118,8 @@ describe('App', () => {
     expect(screen.getByTestId('rival-gemini')).toHaveTextContent('Eliminated')
     expect(screen.getByTestId('rival-gemini')).toHaveClass('rival--eliminated')
     expect(screen.getByTestId('rival-cursor')).toHaveTextContent('Active')
+    expect(screen.getByRole('progressbar', { name: 'Competitors eliminated' })).toHaveAttribute('aria-valuenow', '1')
+    expect(screen.queryByTestId('confetti')).not.toBeInTheDocument()
     expect(screen.getByText('You eliminated Google Gemini Code Assist at B9!')).toBeInTheDocument()
     finishAITurn()
 
@@ -129,6 +131,8 @@ describe('App', () => {
     expect(status()).toBe("Congratulations! You've Beaten the Competition!")
     expect(screen.getByRole('alert')).toHaveTextContent("Congratulations! You've Beaten the Competition!")
     expect(remaining()).toBe('0 of 5 Competitors Remaining')
+    expect(screen.getByRole('progressbar', { name: 'Competitors eliminated' })).toHaveAttribute('aria-valuenow', '5')
+    expect(screen.getByTestId('confetti')).toBeInTheDocument()
     act(() => {
       vi.advanceTimersByTime(VICTORY_BANNER_MS)
     })
@@ -166,6 +170,14 @@ describe('App', () => {
       expect(el).not.toHaveAttribute('data-ship')
       expect(el.querySelector('img')).toBeNull()
     }
+    // Each ship is drawn as one hull: rounded start, middle segments, rounded end.
+    const hull = (c: string) => cell('Your waters', c).querySelector('.cell__hull')
+    expect(hull('A1')).toHaveClass('cell__hull--h', 'cell__hull--start')
+    expect(hull('C1')).toHaveClass('cell__hull--h', 'cell__hull--middle')
+    expect(hull('E1')).toHaveClass('cell__hull--h', 'cell__hull--end')
+    expect(hull('J2')).toHaveClass('cell__hull--v', 'cell__hull--start')
+    expect(hull('J5')).toHaveClass('cell__hull--v', 'cell__hull--end')
+    expect(hull('F1')).toBeNull()
   })
 
   it('keeps enemy competitors hidden until hit, then shows the logo under the red marker', () => {

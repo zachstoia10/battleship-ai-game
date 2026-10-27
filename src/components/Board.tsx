@@ -3,7 +3,8 @@ import { isShipSunk } from '../game/attack'
 import { shipAt } from '../game/board'
 import { BOARD_SIZE, type Board as BoardModel, type Coord, type Ship } from '../game/types'
 import { brandFor } from '../branding/competitors'
-import { Cell, type CellShip, type CellStatus } from './Cell'
+import { shipArt } from './shipArt'
+import { Cell, type CellShip, type CellStatus, type ShipHull, type ShipShape } from './Cell'
 
 export interface PlacementPreview {
   cells: Coord[]
@@ -31,22 +32,34 @@ function getStatus(board: BoardModel, coord: Coord, showShips: boolean): CellSta
   return ship && showShips ? 'ship' : 'empty'
 }
 
+function shapeOf(ship: Ship, coord: Coord): ShipShape {
+  const index = ship.cells.findIndex((c) => sameCoord(c, coord))
+  const last = ship.cells.length - 1
+  return {
+    orientation: last > 0 && ship.cells[0].row === ship.cells[1].row ? 'horizontal' : 'vertical',
+    segment: index === 0 ? 'start' : index === last ? 'end' : 'middle',
+  }
+}
+
+function hullOf(ship: Ship, coord: Coord): ShipHull {
+  const shape = shapeOf(ship, coord)
+  return {
+    ...shape,
+    art: shipArt(ship.id, ship.cells.length, shape.orientation),
+    index: ship.cells.findIndex((c) => sameCoord(c, coord)),
+    length: ship.cells.length,
+  }
+}
+
 function toCellShip(ship: Ship, coord: Coord, revealShape: boolean): CellShip | null {
   const brand = brandFor(ship.id)
   if (!brand) return null
-  const index = ship.cells.findIndex((c) => sameCoord(c, coord))
-  const last = ship.cells.length - 1
   return {
     id: ship.id,
     name: ship.name,
     logo: brand.logo,
     tint: brand.tint,
-    shape: revealShape
-      ? {
-          orientation: last > 0 && ship.cells[0].row === ship.cells[1].row ? 'horizontal' : 'vertical',
-          segment: index === 0 ? 'start' : index === last ? 'end' : 'middle',
-        }
-      : undefined,
+    shape: revealShape ? shapeOf(ship, coord) : undefined,
   }
 }
 
@@ -84,6 +97,8 @@ export function Board({
             const inPreview = previewKeys.has(coordKey(coord))
             // Unhit enemy cells report 'empty', so their competitor is never revealed.
             const ship = status === 'empty' || status === 'miss' ? undefined : shipAt(board, coord)
+            // Your own (unbranded) ships are drawn as one warship spanning their cells.
+            const hull = ship && showShips && !brandFor(ship.id) ? hullOf(ship, coord) : null
             return (
               <Cell
                 key={col}
@@ -92,6 +107,7 @@ export function Board({
                 preview={inPreview ? (preview?.valid ? 'valid' : 'invalid') : null}
                 isLastShot={!!lastShot && sameCoord(lastShot, coord)}
                 ship={ship ? toCellShip(ship, coord, showShips || status === 'sunk') : null}
+                hull={hull}
                 disabled={disabled || !onCellClick || (isCellDisabled?.(coord) ?? false)}
                 onClick={() => onCellClick?.(coord)}
                 onHover={() => onCellHover?.(coord)}
