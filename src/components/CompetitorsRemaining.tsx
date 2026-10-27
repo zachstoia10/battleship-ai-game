@@ -9,6 +9,7 @@ export function CompetitorsRemaining({ board }: { board: Board }) {
     return { def, eliminated: !!ship && isShipSunk(board, ship) }
   })
   const remaining = rivals.filter((r) => !r.eliminated).length
+  const eliminated = ENEMY_FLEET.length - remaining
 
   return (
     <section className="panel rivals" aria-labelledby="rivals-heading">
@@ -18,18 +19,33 @@ export function CompetitorsRemaining({ board }: { board: Board }) {
           <strong>{remaining}</strong> of {ENEMY_FLEET.length} Competitors Remaining
         </p>
       </header>
+      <div
+        className="rivals__progress"
+        role="progressbar"
+        aria-label="Competitors eliminated"
+        aria-valuemin={0}
+        aria-valuemax={ENEMY_FLEET.length}
+        aria-valuenow={eliminated}
+      >
+        <span className="rivals__progress-fill" style={{ width: `${(eliminated / ENEMY_FLEET.length) * 100}%` }} />
+      </div>
       <ul className="rivals__list">
-        {rivals.map(({ def, eliminated }) => (
+        {rivals.map(({ def, eliminated: out }) => (
           <li
             key={def.id}
-            className={`rival${eliminated ? ' rival--eliminated' : ''}`}
+            className={`rival${out ? ' rival--eliminated' : ''}`}
             data-testid={`rival-${def.id}`}
           >
             <span className="rival__logo">
               <img src={brandFor(def.id)?.logo} alt="" />
             </span>
             <span className="rival__name">{def.name}</span>
-            <span className="rival__state">{eliminated ? 'Eliminated' : 'Active'}</span>
+            <span className="rival__state">{out ? 'Eliminated' : 'Active'}</span>
+            {out && (
+              <span className="rival__stamp" aria-hidden="true">
+                Eliminated
+              </span>
+            )}
           </li>
         ))}
       </ul>
